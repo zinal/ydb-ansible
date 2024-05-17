@@ -5,23 +5,29 @@
   ansible.builtin.debug:
     var: ansible_distribution
 
-- name: Ensure libaio1 is installed
-  ansible.builtin.package:
-    name: libaio1
-    state: present
-  when: ansible_distribution == 'Ubuntu' or ansible_distribution == 'Debian' or ansible_distribution == 'Astra Linux'
+- name: Ensure RHEL specific packages are installed
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'AlmaLinux' or ansible_distribution == 'RED' or ansible_distribution == 'SberLinux'
+  block:
+    - name: Ensure libaio is installed
+      ansible.builtin.package:
+        name: libaio
+        state: present
+    - name: Ensure kernel-modules-extra is installed
+      ansible.builtin.package:
+        name: kernel-modules-extra
+        state: present
 
-- name: Ensure libaio is installed
-  ansible.builtin.package:
-    name: libaio
-    state: present
-  when: ansible_distribution == 'CentOS' or ansible_distribution == 'AlmaLinux' or ansible_distribution == 'RED'
-
-- name: Ensure acl is installed
-  ansible.builtin.package:
-    name: acl
-    state: present
+- name: Ensure Debian specific packages are installed
   when: ansible_distribution == 'Ubuntu' or ansible_distribution == 'Debian' or ansible_distribution == 'Astra Linux'
+  block:
+    - name: Ensure libaio1 is installed
+      ansible.builtin.package:
+        name: libaio1
+        state: present
+    - name: Ensure acl is installed
+      ansible.builtin.package:
+        name: acl
+        state: present
 
 - name: Ensure chrony is installed
   ansible.builtin.package:
@@ -83,12 +89,6 @@
     enabled: true
     state: started
     name: ydb-hugepages
-
-- name: Ensure kernel-modules-extra is installed on RHEL variants
-  ansible.builtin.package:
-    name: kernel-modules-extra
-    state: present
-  when: ansible_distribution == 'CentOS' or ansible_distribution == 'AlmaLinux' or ansible_distribution == 'RED'
 
 - name: Copy the kernel module customization for htcp congestion
   copy: src=modules-ydbd.conf dest=/etc/modules-load.d/50-ydbd.conf
