@@ -3,6 +3,7 @@
 Ansible playbooks supporting the deployment of [YDB](https://ydb.tech) clusters into VM or baremetal servers.
 
 Currently, the playbooks support the following scenarios:
+
 * the initial deployment of YDB static (storage) nodes;
 * YDB database creation;
 * the initial deployment of YDB dynamic (database) nodes;
@@ -10,16 +11,20 @@ Currently, the playbooks support the following scenarios:
 * updating cluster configuration file and TLS certificates, with automatic rolling restart.
 
 The following scenarios are yet to be implemented (TODO):
+
 * configuring extra storage devices within the existing YDB static nodes;
 * adding extra YDB static nodes to the existing cluster;
 * removing YDB dynamic nodes from the existing cluster.
 
 Current limitations:
+
 * configuration file customization depends on the support of automatic actor system threads management, which requires YDB version 23.1.26.hotfix1 or later;
 * the cluster configuration file has to be manually created;
 * there are no examples for configuring the storage nodes with different disk layouts (it seems to be doable by defining different `ydb_disks` values for different host groups).
 
 Playbooks were specifically tested on the following Linux flavours:
+
+* Ubuntu 24.04 LTS
 * Ubuntu 22.04 LTS
 * AlmaLinux 8
 * AlmaLinux 9
@@ -58,14 +63,17 @@ The meaning and format of the variables used are specified in the table below.
 ## Installing the YDB cluster using the Ansible playbooks
 
 Overall installation is performed according to the [official instruction](https://ydb.tech/en/docs/deploy/manual/deploy-ydb-on-premises), with several steps automated with Ansible. The steps below are adopted for the Ansible-based process:
+
 1. [Review the system requirements](https://ydb.tech/en/docs/deploy/manual/deploy-ydb-on-premises#requirements), and prepare the YDB hosts. Ensure that SSH access and sudo-based root privileges are available.
 1. [Prepare the TLS certificates](https://ydb.tech/en/docs/deploy/manual/deploy-ydb-on-premises#tls-certificates), the provided [sample script](https://github.com/ydb-platform/ydb/tree/main/ydb/deploy/tls_cert_gen) may be used for automation of this step.
 1. Download the [YDB server distribution](https://ydb.tech/en/docs/downloads/#ydb-server). It is better to use the latest binary version available.
 1. Clone the [Github repository](https://github.com/ydb-platform/ydb-ansible) containing the YDB Ansible playbooks:
+
     ```bash
     git clone -b pre-collections https://github.com/ydb-platform/ydb-ansible
     cd ydb-ansible
     ```
+
 1. Prepare the list of hosts to deploy the YDB static and dynamic nodes, as sections `[ydbd_static]` and `[ydbd_dynamic]` in the `hosts` file. An example file is provided.
 1. Prepare the cluster configuration file [according to the instructions in the documentation](https://ydb.tech/en/docs/deploy/manual/deploy-ydb-on-premises#config), and save it to the `files` subdirectory. Omit the `actor_system_config` section - it will be added automatically.
 1. Copy the `group_vars/all.example` file into `group_vars/all`, and customize it according to your environment.
@@ -78,12 +86,14 @@ Overall installation is performed according to the [official instruction](https:
 ## Updating the cluster configuration files
 
 To update the YDB cluster configuration files (`ydbd-config.yaml`, TLS certificates and keys) using the Ansible playbook, the following actions are necessary:
+
 1. Ensure that the `hosts` file contains the current list of YDB cluster nodes, both static and dynamic.
 1. Ensure that the configuration variable `ydbd_config` in the `group_vars/all` file points to the desired YDB server configuration file.
 1. Ensure that the configuration variable `ydbd_tls_dir` points to the directory containing the desired TLS key and certificate files for all the nodes within the YDB cluster.
 1. Apply the updated configuration to the cluster by running the `run-update-config.sh` script. Ensure that the playbook has been completed successfully, and diagnose and fix execution errors if they happen.
 
 Notes:
+
 1. Please take into account that rolling restart is performed node by node, and for a large cluster the process may consume a significant amount of time.
 1. For Certificate Authority (CA) certificate rotation, at least two separate configuration updates are needed:
     * first to deploy the ca.crt file, containing both new and old CA certificates;
@@ -92,6 +102,7 @@ Notes:
 ## What is actually done by the playbooks?
 
 ### Actions executed for installing YDB nodes
+
 1. libaio or libaio1 is installed, depending on the operating system
 1. chrony is installed and enabled to ensure time synchronization
 1. jq is installed to support some scripting logic used in the playbooks
@@ -104,6 +115,7 @@ Notes:
 1. [Transparent huge pages](https://www.kernel.org/doc/html/latest/admin-guide/mm/transhuge.html) (THP) are enabled on each server, which is implemented by the creation, activation and start of the corresponding systemd service.
 
 ### Actions executed for the initial deployment of YDB storage cluster
+
 1. Installation actions are executed.
 1. For each disk configured, it is checked for the existing YDB data. If none found, disk is completely re-partitioned, and obliterated. For the existing YDB data, no changes are made.
    > WARNING: the safety checks do not work for YDB disks using non-default encryption keys. DATA LOSS IS POSSIBLE if the encryption is actually used. Probably an enhancement is needed to support the encryption key to be specified in the deployment option.
@@ -114,11 +126,13 @@ Notes:
 1. The initial password for the `root` user is configured according to contents of the `files/secret` file.
 
 ### Actions executed for YDB dynamic nodes deployment
+
 1. Installation actions are executed.
 1. For each database configured, the list of YDB dynnode systemd services are created and configured.
 1. YDB dynnode services are started.
 
 ### Actions executed for the configuration update
+
 1. YDB TLS certificates and keys are copied to each server.
 1. YDB cluster configuration file is copied to each server.
 1. Rolling restart is performed for YDB storage nodes, node by node, checking for the YDB storage cluster to become healthy after the restart of each node.
