@@ -12,10 +12,10 @@ ydb_dir: /opt/ydb
 ydb_tls_dir: ./tls/CA/certs/2023-03-09_16-49-39
 
 # YDB server software archive
-ydb_archive: yasubd-24.1.18.2-linux-amd64.tar.gz
+ydb_archive: yasubd-24.3.9.1-linux-amd64.tar.gz
 
 # YDB server software release
-ydb_version: 24.1.18.2
+ydb_version: 24.3.9.1
 
 # Extra options passed to tar for unpack, typically "--strip-component=1"
 ydb_unpack_options: "--strip-component=1"
@@ -28,14 +28,13 @@ ydb_dbname: testdb
 ydb_pool_kind: ssd
 
 # Default number of groups per newly created database
-ydb_default_groups: 9
+ydb_default_groups: 3
 
 # Name of YDB cluster configuration file
-ydb_config: config.yaml
+ydb_cluster_config: config.yaml
 
-# Number of cores for static and dynamic nodes
-ydb_cores_static: 31
-ydb_cores_dynamic: 14
+# Name of YDB database configuration file
+ydb_database_config: config-testdb.yaml
 
 # YDB physical disk device names and labels for static nodes
 ydb_disks:
@@ -69,10 +68,11 @@ ydb_affinity_static: '0-31'
 # Extra sleep time to allow dynamic nodes to settle up
 dynnode_restart_sleep_seconds: 10
 
+# Unified Agent installation is currently not supported.
 # Source path to Unified Agent binary
-unified_agent_binary: ../unified_agent
+# unified_agent_binary: ../unified_agent
 # Unified Agent installation root
-unified_agent_home: /opt/ydb/unified_agent
+# unified_agent_home: /opt/ydb/unified_agent
 
 # Optional network congestion control setting, htcp recommended
 ydb_congestion_setting: htcp
