@@ -1,0 +1,42 @@
+---
+# ydbd configuration
+
+- name: Cleanup the secrets
+  file:
+    path: "{{ ydb_dir }}/certs/secret"
+    state: absent
+
+- name: Apply the YDB dynamic configuration
+  block:
+    - name: Add the dynamic configuration script
+      template:
+        src: apply_dyn_config.j2
+        dest: "{{ ydb_dir }}/home/apply_dyn_config.sh"
+        group: ydb
+        owner: ydb
+        mode: '0755'
+    - name: Add the dynamic configuration input file
+      copy:
+        src: "{{ ydb_database_config }}"
+        dest: "{{ ydb_dir }}/home/dynamic_config.yaml"
+        group: ydb
+        owner: ydb
+        mode: '0644'
+    - name: Transfer the secrets
+      copy:
+        src: secret
+        dest: "{{ ydb_dir }}/certs/secret"
+        group: ydb
+        owner: ydb
+        mode: '0700'
+    - name: Apply the dynamic configuration
+      command: "{{ ydb_dir }}/home/apply_dyn_config.sh {{ inventory_hostname }} {{ ydb_dir }}/home/dynamic_config.yaml"
+      become: true
+      become_user: ydb
+  run_once: true
+  when: ydb_database_config is defined
+
+- name: Cleanup the secrets
+  file:
+    path: "{{ ydb_dir }}/certs/secret"
+    state: absent
