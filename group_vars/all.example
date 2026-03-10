@@ -32,10 +32,13 @@ ydb_default_groups: 9
 
 # Name of YDB cluster configuration file
 ydb_config: config.yaml
+# Name of specific YDB configuration for storage
+#   Can optionally be specified to enable custom actor system settings
+# ydb_config_storage: config-storage.yaml
 
 # Number of cores for static and dynamic nodes
-ydb_cores_static: 31
-ydb_cores_dynamic: 14
+ydb_cores_static: 31     # 31, if 32 cores are pinned per storage process
+ydb_cores_dynamic: 14    # 14, if 16 cores are pinned per database process
 
 # YDB physical disk device names and labels for static nodes
 ydb_disks:
