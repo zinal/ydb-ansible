@@ -17,16 +17,25 @@
   template:
     src: unified-agent-service.j2
     dest: "/etc/systemd/system/ydb-unified-agent.service"
+    group: bin
+    owner: root
+    mode: '0644'
 
 - name: Generate the unified agent configuration
   template:
     src: unified-agent-config.j2
     dest: "{{ unified_agent_home }}/unified_agent.yaml"
+    group: bin
+    owner: root
+    mode: '0644'
 
 - name: Generate the log rotation configuration
   template:
     src: ydb-logs-rotation.j2
     dest: /etc/logrotate.d/ydbd
+    group: bin
+    owner: root
+    mode: '0644'
 
 - name: Refresh systemd services configuration
   ansible.builtin.systemd:
