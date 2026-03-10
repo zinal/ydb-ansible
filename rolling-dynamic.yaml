@@ -1,5 +1,6 @@
 # Rolling restart for the configured dynamic nodes
 
 - hosts: ydbd_dynamic
+  any_errors_fatal: true
   roles:
   - role: ydbd_rolling_dynamic

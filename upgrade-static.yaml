@@ -1,3 +1,4 @@
 - hosts: ydbd_static
+  any_errors_fatal: true
   roles:
   - role: ydbd_upgrade_static
