@@ -56,6 +56,8 @@
   delegate_facts: true
   any_errors_fatal: true
   block:
+    - name: Delay to settle the dynamic nodes
+      ansible.builtin.pause: seconds={{ dynnode_restart_sleep_seconds }}
     - name: "Invoke the service restart on {{ dynnode_name }}"
       any_errors_fatal: true
       loop: "{{ ydbd_db_svc.stdout_lines }}"
@@ -63,7 +65,7 @@
         state: restarted
         name: "{{ item.split(' ')[0] }}.service"
     - name: "Transfer the secrets to {{ dynnode_name }}"
-      copy:
+      ansible.builtin.copy:
         src: secret
         dest: "{{ ydb_dir }}/certs/secret"
         group: ydb
@@ -75,7 +77,6 @@
       loop: "{{ ydbd_db_svc.stdout_lines }}"
       ansible.builtin.command:
         cmd: "{{ ydb_dir }}/home/wait_dynamic.sh {{ dynnode_name }} {{ item.split(' ')[1] }} {{ item.split(' ')[2] }}"
+  always:
     - name: "Cleanup the transferred secrets on {{ dynnode_name }}"
-      file: state=absent path={{ ydb_dir }}/certs/secret
-    - name: Additional delay to settle the dynamic nodes
-      ansible.builtin.pause: seconds={{ dynnode_restart_sleep_seconds }}
+      ansible.builtin.file: state=absent path={{ ydb_dir }}/certs/secret

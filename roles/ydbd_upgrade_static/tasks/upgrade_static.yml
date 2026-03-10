@@ -52,26 +52,22 @@
   delegate_facts: true
   any_errors_fatal: true
 
-- name: Transfer the secrets
-  copy:
-    src: secret
-    dest: "{{ ydb_dir }}/certs/secret"
-    group: ydb
-    owner: ydb
-    mode: '0700'
-  delegate_to: "{{ snode_name }}"
-  delegate_facts: true
-  any_errors_fatal: true
-
 - name: Wait for storage state recovery on {{ snode_name }}
-  command: "{{ ydb_dir }}/home/wait_normal.sh {{ snode_name }}"
-  become: true
-  become_user: ydb
   delegate_to: "{{ snode_name }}"
   delegate_facts: true
   any_errors_fatal: true
-
-- name: Cleanup the transferred secrets
-  file: state=absent path={{ ydb_dir }}/certs/secret
-  delegate_to: "{{ snode_name }}"
-  delegate_facts: true
+  block:
+    - name: Transfer the secrets to {{ snode_name }}
+      ansible.builtin.copy:
+        src: secret
+        dest: "{{ ydb_dir }}/certs/secret"
+        group: ydb
+        owner: ydb
+        mode: '0700'
+    - name: Run wait command on {{ snode_name }}
+      command: "{{ ydb_dir }}/home/wait_normal.sh {{ snode_name }}"
+      become: true
+      become_user: ydb
+  always:
+    - name: Cleanup the transferred secrets on {{ snode_name }}
+      ansible.builtin.file: state=absent path={{ ydb_dir }}/certs/secret
