@@ -26,12 +26,13 @@ ExecStart={{ ydb_dir }}/bin/ydbd server --tcp \
     --node static \
 {%- endif %}
 {%- if ydb_front is defined %}
-    --grpc-public-host {{ ydb_front }} \
+    --grpc-public-host {{ ydb_front }} --grpcs-public-port 2135 \
+{%- else %}
+    --grpcs-port 2135 \
 {%- endif %}
-    --grpcs-port 2135 --ic-port 19001 --mon-port 8765 \
+    --ic-port 19001 --mon-port 8765 --mon-cert {{ ydb_dir }}/certs/web.pem \
     --ca {{ ydb_dir }}/certs/ca.crt --cert {{ ydb_dir }}/certs/node.crt --key {{ ydb_dir }}/certs/node.key \
-    --grpc-ca {{ ydb_dir }}/certs/ca.crt --grpc-cert {{ ydb_dir }}/certs/node.crt --grpc-key {{ ydb_dir }}/certs/node.key \
-    --mon-cert {{ ydb_dir }}/certs/web.pem
+    --grpc-ca {{ ydb_dir }}/certs/ca.crt --grpc-cert {{ ydb_dir }}/certs/node.crt --grpc-key {{ ydb_dir }}/certs/node.key
 LimitNOFILE=65536
 LimitCORE=0
 #LimitCORE=infinity
