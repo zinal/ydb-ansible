@@ -11,3 +11,4 @@ files/secret-credentials.yml
 *~
 ydb-token-file
 ydbd-token-file
+.vault-password
