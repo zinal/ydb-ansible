@@ -83,13 +83,13 @@ Overall installation is performed according to the [official instruction](https:
    ```
 1. Encrypt both secret files with Ansible Vault:
    ```bash
-   ansible-vault encrypt --vault-password-file .vault-password files/secret
-   ansible-vault encrypt --vault-password-file .vault-password files/secret-credentials.yml
+   ansible-vault encrypt files/secret
+   ansible-vault encrypt files/secret-credentials.yml
    ```
 1. To modify encrypted secrets later, use:
    ```bash
-   ansible-vault edit --vault-password-file .vault-password files/secret
-   ansible-vault edit --vault-password-file .vault-password files/secret-credentials.yml
+   ansible-vault edit files/secret
+   ansible-vault edit files/secret-credentials.yml
    ```
 1. Deploy the static nodes and initialize the cluster by running the `run-install-static.sh` script. Ensure that the playbook has been completed successfully, and diagnose and fix execution errors if they happen.
 1. Create at least one database [according to the documentation](https://ydb.tech/en/docs/deploy/manual/deploy-ydb-on-premises#create-db). Multiple databases may run on a single cluster, each requiring the YDB dynamic node services to handle the requests. To create the database using the Ansible playbook, use the `run-create-database.sh` script. Use the `ydb_dbname` and `ydb_default_groups` variables to configure the desired database name and the initial number of storage groups in the new database.

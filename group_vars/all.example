@@ -99,10 +99,8 @@ ydb_fluentbit_destination: "grpcs://ycydb-s1:2135/Domain0/admin"
 # Logs delivery destination database trusted CA
 ydb_fluentbit_ca: "/opt/ydb/cfg/ca.crt"
 
-# Logs delivery destination database credentials.
-# See examples/fluentbit for DDL and permissions.
 # Put this variable into files/secret-credentials.yml (Ansible Vault).
-ydb_fluentbit_credentials: "fluentbit:password"
+# ydb_fluentbit_credentials: "fluentbit:password"
 
 # -----------------------------------------
 # Loglugger specific log collection setup
@@ -139,16 +137,17 @@ loglugger_server_port: 27312
 loglugger_server_listen_addr: ":{{ loglugger_server_port }}"
 
 # Loglugger server settings.
-loglugger_server_ydb_endpoint: "grpcs://ycydb-s1:2135"
+loglugger_server_ydb_endpoint: "grpcs://cluster1.domain.com:2135"
 loglugger_server_ydb_database: "/Root/logdb"
-# Put these variables into files/secret-credentials.yml (Ansible Vault).
-loglugger_server_ydb_auth_login: "loguser"
-loglugger_server_ydb_auth_password: "P@$$w0rd+"
 loglugger_server_ydb_table: "ydblogs"
 loglugger_server_position_table: "loglugger_positions"
 loglugger_server_message_regex: '^(?P<P_DTTM>[^ ]*) :(?P<P_SERVICE>[^ ]*) (?P<P_LEVEL>[^ ]*): (?P<P_MESSAGE>.*).*$'
 loglugger_server_systemd_unit_regex: '^ydbd-(?P<P_DBNAME>[^-]+)-.*\\.service$'
 loglugger_server_message_regex_no_match: "send_raw"
+
+# Put these variables into files/secret-credentials.yml (Ansible Vault).
+# loglugger_server_ydb_auth_login: "loguser"
+# loglugger_server_ydb_auth_password: "password"
 
 # Destination field mapping is rendered from loglugger_server_field_mapping into:
 #   {{ loglugger_home }}/config/field_mapping.yaml
