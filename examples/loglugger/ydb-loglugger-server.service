@@ -1,0 +1,17 @@
+[Unit]
+Description=Loglugger server for YDBD journald logs
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+ExecStart=/opt/ydb/loglugger/bin/loglugger-server \
+  -config /opt/ydb/loglugger/config/loglugger-server.yaml
+Restart=always
+RestartSec=5s
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

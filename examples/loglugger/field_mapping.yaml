@@ -1,0 +1,32 @@
+field_mapping:
+  # Always present identity and uniqueness fields.
+  - source: client_id
+    destination: hostname
+  - source: systemd_unit
+    destination: unit
+  - source: log_timestamp_us
+    destination: ts_log
+    transform: timestamp64_us
+  - source: message_cityhash64
+    destination: message_hash
+    transform: uint64
+
+  # Parsed fields from message regex groups.
+  - source: parsed.P_DTTM
+    destination: ts_orig
+    transform: timestamp64
+  - source: parsed.P_SERVICE
+    destination: service
+    default: unknown
+  - source: parsed.P_LEVEL
+    destination: level
+    default: unknown
+  - source: parsed.P_DBNAME
+    destination: dbname
+    default: "-"
+
+  # Keep raw `message`, overwrite with parsed value when present.
+  - source: message
+    destination: msg
+  - source: parsed.P_MESSAGE
+    destination: msg

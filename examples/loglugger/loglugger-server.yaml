@@ -1,0 +1,31 @@
+listen_addr: ":27312"
+writer_backend: "ydb"
+# Request body limits (bytes).
+# max_compressed_body_bytes limits raw HTTP body before decoding Content-Encoding.
+# max_decompressed_body_bytes limits decoded JSON payload size.
+max_compressed_body_bytes: 8388608
+max_decompressed_body_bytes: 33554432
+position_table: "loglugger_positions"
+field_mapping_file: "/opt/ydb/loglugger/config/field_mapping.yaml"
+message_regex: '^(?P<P_DTTM>[^ ]*) :(?P<P_SERVICE>[^ ]*) (?P<P_LEVEL>[^ ]*): (?P<P_MESSAGE>.*).*$'
+systemd_unit_regex: '^ydbd-(?P<P_DBNAME>[^-]+)-.*\.service$'
+message_regex_no_match: "send_raw" # send_raw|skip
+# Parse timezone-less timestamps using OS local timezone before saving.
+# Useful for local-time log formats, but dangerous if hosts/timezones are inconsistent.
+convert_time_to_local_tz: true
+
+# YDB destination settings.
+ydb_endpoint: "grpcs://localhost:2135"
+ydb_database: "/local"
+ydb_table: "ydblogs"
+ydb_auth_mode: "anonymous" # anonymous|static|service-account-key|metadata
+# ydb_auth_login: ""
+# ydb_auth_password: ""
+# ydb_auth_sa_key_file: ""
+# ydb_auth_metadata_url: ""
+# ydb_ca_path: "/opt/ydb/certs/ca.crt"
+
+# mTLS server settings (same model as the default example).
+tls_cert_file: "/opt/ydb/loglugger/certs/server.crt"
+tls_key_file: "/opt/ydb/loglugger/certs/server.key"
+tls_ca_file: "/opt/ydb/loglugger/certs/ca.crt"
