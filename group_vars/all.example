@@ -67,7 +67,16 @@ ydb_dynnodes:
 #  - { instance: 'b', offset: 1, affinity: '48-63' }
 
 # Optional parameter defining the CPU affinity of static nodes' services
-ydb_affinity_static: '0-31'
+# ydb_affinity_static: '0-31'
+
+# Optional setting to enable logging to specific journald namespace.
+# Configuration: https://www.freedesktop.org/software/systemd/man/latest/journald.conf.html
+#   cp -v /etc/systemd/journald.conf /etc/systemd/journald@ydbd.conf
+#    -> ForwardToSyslog=no
+#    -> RateLimitIntervalSec=0
+#    -> RateLimitBurst=0
+#    -> SystemMaxUse=10G
+# ydb_log_namespace: 'ydbd'
 
 # Extra sleep time to allow dynamic nodes to settle up
 dynnode_restart_sleep_seconds: 10

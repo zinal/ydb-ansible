@@ -13,6 +13,9 @@ User=ydb
 UMask=077
 #AmbientCapabilities=CAP_SYS_PTRACE
 PermissionsStartOnly=true
+{%- if ydb_log_namespace is defined %}
+LogNamespace={{ ydb_log_namespace }}
+{%- endif %}
 SyslogIdentifier=ydbd
 SyslogFacility=daemon
 SyslogLevel=err
