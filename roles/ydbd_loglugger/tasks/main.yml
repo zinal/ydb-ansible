@@ -13,7 +13,8 @@
     loglugger_client_servers_effective: >-
       {{
         (groups[loglugger_server_group] | default([]))
-        | map('regex_replace', '^(.*)$', 'https://\\1:' ~ (loglugger_server_port | string))
+        | map('regex_replace', '^', 'https://')
+        | map('regex_replace', '$', ':' ~ (loglugger_server_port | string))
         | list
       }}
   when: (loglugger_client_servers | length) == 0
@@ -46,6 +47,18 @@
       loglugger_server_ydb_table.
   when:
     - loglugger_server_enabled_effective | bool
+
+- name: Validate YDB static auth credentials for loglugger server
+  ansible.builtin.assert:
+    that:
+      - loglugger_server_ydb_auth_login | length > 0
+      - loglugger_server_ydb_auth_password | length > 0
+    fail_msg: >-
+      loglugger_server_ydb_auth_mode=static requires non-empty values:
+      loglugger_server_ydb_auth_login and loglugger_server_ydb_auth_password.
+  when:
+    - loglugger_server_enabled_effective | bool
+    - (loglugger_server_ydb_auth_mode | lower) == 'static'
 
 - name: Create loglugger home directory
   ansible.builtin.file:
