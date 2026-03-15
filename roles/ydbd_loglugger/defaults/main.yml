@@ -10,7 +10,7 @@ loglugger_certs_dir: "{{ loglugger_home }}/certs"
 # Client installation settings.
 loglugger_client_enabled: true
 loglugger_client_service_name: ydb-loglugger-client
-loglugger_client_service_mask: ""
+loglugger_client_service_mask: "ydbd*.service"
 
 # Client certificate/key are selected by logical name under tls/CA/clients/<logical_name>.
 loglugger_client_certs_dir: ./tls/CA/clients
@@ -30,7 +30,6 @@ loglugger_client_servers: []
 
 # Server configuration defaults.
 loglugger_server_config_path: "{{ loglugger_config_dir }}/server.yaml"
-loglugger_server_position_table: loglugger_positions
 loglugger_server_field_mapping_file: "{{ loglugger_config_dir }}/field_mapping.yaml"
 loglugger_server_field_mapping:
   - source: client_id
@@ -70,13 +69,15 @@ loglugger_server_extra_config: {}
 # YDB backend settings.
 loglugger_server_ydb_endpoint: ""
 loglugger_server_ydb_database: ""
-loglugger_server_ydb_table: ""
-loglugger_server_ydb_auth_mode: static
+loglugger_server_ydb_auth_mode: "static"
 loglugger_server_ydb_auth_login: ""
 loglugger_server_ydb_auth_password: ""
 loglugger_server_ydb_auth_sa_key_file: ""
 loglugger_server_ydb_auth_metadata_url: ""
-loglugger_server_ydb_ca_path: ""
+loglugger_server_ydb_ca_path: "{{ ydb_dir }}/cfg/ca.crt"
+
+loglugger_server_position_table: "loglugger_positions"
+loglugger_server_ydb_table: "ydblogs"
 
 # Optional strict TLS client subject checks.
 loglugger_server_tls_client_subject_cn: []

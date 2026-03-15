@@ -127,7 +127,7 @@ loglugger_client_cert_logical_name: "loglugger"
 #   nginx.service
 #   nginx*.service
 #   regex:^nginx-(api|worker)\\.service$
-loglugger_client_service_mask: "ydb*.service"
+loglugger_client_service_mask: "ydbd*.service"
 
 # Hosts selected for server component deployment can be controlled by either:
 #   1) adding hosts into inventory group [loglugger_server], or
@@ -139,8 +139,10 @@ loglugger_server_listen_addr: ":{{ loglugger_server_port }}"
 # Loglugger server settings.
 loglugger_server_ydb_endpoint: "grpcs://cluster1.domain.com:2135"
 loglugger_server_ydb_database: "/Root/logdb"
+
 loglugger_server_ydb_table: "ydblogs"
 loglugger_server_position_table: "loglugger_positions"
+
 loglugger_server_message_regex: '^(?P<P_DTTM>[^ ]*) :(?P<P_SERVICE>[^ ]*) (?P<P_LEVEL>[^ ]*): (?P<P_MESSAGE>.*).*$'
 loglugger_server_systemd_unit_regex: '^ydbd-(?P<P_DBNAME>[^-]+)-.*\\.service$'
 loglugger_server_message_regex_no_match: "send_raw"
