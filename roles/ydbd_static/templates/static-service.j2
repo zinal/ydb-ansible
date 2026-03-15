@@ -11,7 +11,6 @@ Restart=always
 RestartSec=1
 User=ydb
 UMask=077
-#AmbientCapabilities=CAP_SYS_PTRACE
 PermissionsStartOnly=true
 SyslogIdentifier=ydbd
 SyslogFacility=daemon
@@ -19,23 +18,23 @@ SyslogLevel=err
 WorkingDirectory={{ ydb_dir }}/audit/storage
 Environment=LD_LIBRARY_PATH={{ ydb_dir }}/lib
 ExecStart={{ ydb_dir }}/bin/ydbd server --tcp \
-    --yaml-config  {{ ydb_dir }}/cfg/ydbd-static.yaml \
 {%- if ydb_back_number is defined %}
     --node {{ ydb_back_number }} \
 {%- else %}
     --node static \
 {%- endif %}
 {%- if ydb_front is defined %}
-    --grpc-public-host {{ ydb_front }} --grpcs-public-port 2135 \
-{%- else %}
-    --grpcs-port 2135 \
+    --grpc-public-host {{ ydb_front }} \
 {%- endif %}
+    --yaml-config  {{ ydb_dir }}/cfg/ydbd-static.yaml \
+    --grpcs-port 2135 --grpc-port 5432 \
     --ic-port 19001 --mon-port 8765 --mon-cert {{ ydb_dir }}/certs/web.pem \
     --ca {{ ydb_dir }}/certs/ca.crt --cert {{ ydb_dir }}/certs/node.crt --key {{ ydb_dir }}/certs/node.key \
     --grpc-ca {{ ydb_dir }}/certs/ca.crt --grpc-cert {{ ydb_dir }}/certs/node.crt --grpc-key {{ ydb_dir }}/certs/node.key
 LimitNOFILE=65536
 LimitCORE=0
 #LimitCORE=infinity
+#AmbientCapabilities=CAP_SYS_PTRACE
 LimitMEMLOCK=3221225472
 {%- if ydb_affinity_static is defined %}
 CPUAffinity={{ ydb_affinity_static }}
