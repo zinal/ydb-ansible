@@ -152,7 +152,7 @@ loglugger_server_ydb_database: "/Root/logdb"
 loglugger_server_ydb_table: "ydblogs"
 loglugger_server_position_table: "loglugger_positions"
 
-loglugger_server_message_regex: '^(?P<P_DTTM>[^ ]*) :(?P<P_SERVICE>[^ ]*) (?P<P_LEVEL>[^ ]*): (?P<P_MESSAGE>.*).*$'
+loglugger_server_message_regex: '^(?:(?P<P_DTTM>[^ ]+)\s+)?:(?P<P_SERVICE>[^ ]+)\s+(?P<P_LEVEL>[^ ]+):\s+(?P<P_MESSAGE>.*)$'
 loglugger_server_systemd_unit_regex: '^ydbd-(?P<P_DBNAME>[^-]+)-.*[.]service$'
 loglugger_server_message_regex_no_match: "send_raw"
 
