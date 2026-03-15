@@ -53,9 +53,53 @@ The meaning and format of the variables used are specified in the table below.
 | `ydb_cores_dynamic` | Number of cores to be used by thread pools of the dynamic nodes |
 | `ydb_pool_kind` | YDB default storage pool kind, as specified in the static nodes configuration file in the `storage_pool_types.kind` field |
 | `ydb_default_groups` | Initial number of storage groups in the newly created database |
+| `ydb_log_namespace` | Optional `systemd` journald namespace for YDB services (`LogNamespace=` in unit files). When set, prepare a matching `journald@<namespace>` configuration on target hosts before deployment. |
 | `dynnode_restart_sleep_seconds` | Number of seconds to sleep after startup of each dynamic node during the rolling restart. |
 | `ydb_congestion_setting` | TCP congestion control setting, recommended value is `htcp`. Optional |
 | `ydb_congestion_module` | TCP congestion control kernel loadable module name, recommended value is `tcp_htcp`. Optional |
+
+### Using dedicated journald namespace (`ydb_log_namespace`)
+
+If `ydb_log_namespace` is set (for example `ydbd`), the generated YDB unit files include `LogNamespace=ydbd`, and logs are written through `systemd-journald@<namespace>.service`.
+
+Before running the playbooks, prepare journald namespace configuration on each target host:
+
+1. Create namespace-specific config from the default one:
+   ```bash
+   sudo cp -v /etc/systemd/journald.conf /etc/systemd/journald@ydbd.conf
+   ```
+1. Edit `/etc/systemd/journald@ydbd.conf` and set namespace limits:
+   ```ini
+   [Journal]
+   # Dedicated namespace does not forward YDB logs to syslog by default.
+   ForwardToSyslog=no
+
+   # Disable journald rate limiting for YDB logs to avoid message truncation
+   # during bursts.
+   RateLimitIntervalSec=0
+   RateLimitBurst=0
+
+   # Cap disk usage for this namespace to prevent filesystem overflow.
+   # Tune values according to host disk size and retention requirements.
+   SystemMaxUse=10G
+   SystemKeepFree=5G
+   SystemMaxFileSize=256M
+   MaxRetentionSec=14day
+   ```
+1. Enable and restart namespace journald instance:
+   ```bash
+   sudo systemctl daemon-reload
+   sudo systemctl enable --now systemd-journald@ydbd.service
+   sudo systemctl restart systemd-journald@ydbd.service
+   ```
+1. In `group_vars/all` set:
+   ```yaml
+   ydb_log_namespace: "ydbd"
+   ```
+
+Notes:
+* For YDB operational troubleshooting, keep journald rate limiting disabled in this namespace.
+* Keep `SystemMaxUse` and `SystemKeepFree` conservative for the host profile so YDB data volumes are not starved by logs.
 
 ## Installing the YDB cluster using the Ansible playbooks
 
@@ -73,8 +117,8 @@ Overall installation is performed according to the [official instruction](https:
 1. Copy the `group_vars/all.example` file into `group_vars/all`, and customize it according to your environment.
 1. Copy the `files/secret.example` file to `files/secret`, and customize the desired initial administrative password, leaving the username `root` unchanged.
 1. Copy `files/secret-credentials.example.yml` to `files/secret-credentials.yml` and set:
-   * `ydb_fluentbit_credentials`
-   * `loglugger_server_ydb_auth_login`
+   * `ydb_fluentbit_credentials` (if fluentbit will be used)
+   * `loglugger_server_ydb_auth_login` (if loglugger will be used)
    * `loglugger_server_ydb_auth_password`
 1. Store the Vault password in a local file and restrict permissions:
    ```bash
