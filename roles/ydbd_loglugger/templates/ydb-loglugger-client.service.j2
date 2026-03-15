@@ -9,8 +9,11 @@ User=root
 Group=root
 EnvironmentFile=/etc/default/{{ loglugger_client_service_name }}
 ExecStart={{ loglugger_bin_dir }}/loglugger-client \
-  -server ${LOGLUGGER_SERVER} \
+{%- if ydb_log_namespace is defined %}
+  -journal-namespace {{ ydb_log_namespace }} \
+{%- endif %}
   -service-mask ${LOGLUGGER_SERVICE_MASK} \
+  -server ${LOGLUGGER_SERVER} \
   -tls-ca-file ${LOGLUGGER_TLS_CA_FILE} \
   -tls-cert-file ${LOGLUGGER_TLS_CERT_FILE} \
   -tls-key-file ${LOGLUGGER_TLS_KEY_FILE}
