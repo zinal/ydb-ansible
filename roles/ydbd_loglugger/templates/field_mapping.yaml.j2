@@ -1,0 +1,11 @@
+field_mapping:
+{% for item in loglugger_server_field_mapping %}
+  - source: {{ item.source }}
+    destination: {{ item.destination }}
+{% if item.transform is defined %}
+    transform: {{ item.transform }}
+{% endif %}
+{% if item.default is defined %}
+    default: {{ item.default | to_json }}
+{% endif %}
+{% endfor %}

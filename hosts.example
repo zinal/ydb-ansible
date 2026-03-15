@@ -23,3 +23,8 @@ ycydb-d6 ydb_node_dc=zone-b ydb_node_rack=3 ydb_node_body=1
 ycydb-d7 ydb_node_dc=zone-c ydb_node_rack=1 ydb_node_body=1
 ycydb-d8 ydb_node_dc=zone-c ydb_node_rack=2 ydb_node_body=1
 ycydb-d9 ydb_node_dc=zone-c ydb_node_rack=3 ydb_node_body=1
+
+# Optional subset running loglugger server component.
+[loglugger_server]
+ycydb-s1
+ycydb-s2

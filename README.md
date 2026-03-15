@@ -7,7 +7,8 @@ Currently, the playbooks support the following scenarios:
 * YDB database creation;
 * the initial deployment of YDB dynamic (database) nodes;
 * adding extra YDB dynamic nodes to the YDB cluster;
-* updating cluster configuration file and TLS certificates, with automatic rolling restart.
+* updating cluster configuration file and TLS certificates, with automatic rolling restart;
+* deploying and refreshing `loglugger` server/client services and their certificates.
 
 The following scenarios are yet to be implemented (TODO):
 * configuring extra storage devices within the existing YDB static nodes;
@@ -69,7 +70,16 @@ Overall installation is performed according to the [official instruction](https:
 1. Prepare the list of hosts to deploy the YDB static and dynamic nodes, as sections `[ydbd_static]` and `[ydbd_dynamic]` in the `hosts` file. An example file is provided.
 1. Prepare the cluster configuration file [according to the instructions in the documentation](https://ydb.tech/en/docs/deploy/manual/deploy-ydb-on-premises#config), and save it to the `files` subdirectory. Omit the `actor_system_config` section - it will be added automatically.
 1. Copy the `group_vars/all.example` file into `group_vars/all`, and customize it according to your environment.
-1. Copy the `files/secret.example` file to `files/secret`, and customize the desired initial administrative password, leaving the username `root` unchanged. Ansible Vault can be configured to protect this sensitive file (TODO document actions).
+1. Copy the `files/secret.example` file to `files/secret`, and customize the desired initial administrative password, leaving the username `root` unchanged.
+1. Copy `files/secret-credentials.example.yml` to `files/secret-credentials.yml` and set:
+   * `ydb_fluentbit_credentials`
+   * `loglugger_server_ydb_auth_login`
+   * `loglugger_server_ydb_auth_password`
+1. Encrypt both secret files with Ansible Vault:
+   ```bash
+   ansible-vault encrypt files/secret
+   ansible-vault encrypt files/secret-credentials.yml
+   ```
 1. Deploy the static nodes and initialize the cluster by running the `run-install-static.sh` script. Ensure that the playbook has been completed successfully, and diagnose and fix execution errors if they happen.
 1. Create at least one database [according to the documentation](https://ydb.tech/en/docs/deploy/manual/deploy-ydb-on-premises#create-db). Multiple databases may run on a single cluster, each requiring the YDB dynamic node services to handle the requests. To create the database using the Ansible playbook, use the `run-create-database.sh` script. Use the `ydb_dbname` and `ydb_default_groups` variables to configure the desired database name and the initial number of storage groups in the new database.
 1. Deploy the dynamic nodes running the `run-install-dynamic.sh` script. Ensure that the playbook has been completed successfully, and diagnose and fix execution errors if they happen.
@@ -123,3 +133,40 @@ Notes:
 1. YDB cluster configuration file is copied to each server.
 1. Rolling restart is performed for YDB storage nodes, node by node, checking for the YDB storage cluster to become healthy after the restart of each node.
 1. Rolling restart is performed for YDB database nodes, server by server, restarting all nodes sitting in the single server at a time, and waiting for the specified number of seconds after each server's nodes restart.
+
+## Deploying Loglugger
+
+The `loglugger` role installs:
+1. `loglugger-client` on all YDB nodes (`ydbd_static:ydbd_dynamic`);
+1. `loglugger-server` only on the selected subset of nodes.
+
+Selection of server nodes can be done with either:
+1. the inventory group `[loglugger_server]`;
+1. `loglugger_server_enabled=true` in host/group variables.
+
+Run:
+```bash
+./run-loglugger.sh
+```
+
+For configuration refresh (certificate rotation, server list updates, YDB backend changes), update variables and rerun the same playbook. The role is idempotent and restarts services only when relevant files or settings change.
+The role also renders `field_mapping.yaml` for the server (`field_mapping_file`) and supports parser settings such as `loglugger_server_message_regex`, `loglugger_server_systemd_unit_regex`, and `loglugger_server_message_regex_no_match`.
+
+## Protecting logging credentials with Vault
+
+The following variables should be defined directly in an encrypted Vault file:
+* `ydb_fluentbit_credentials`
+* `loglugger_server_ydb_auth_login`
+* `loglugger_server_ydb_auth_password`
+
+Use `files/secret-credentials.example.yml` as a template. Wrapper scripts now pass the encrypted vars file automatically:
+
+```bash
+./run-fluentbit-all.sh
+./run-loglugger.sh
+```
+
+By default, `ansible.cfg` uses `vault_identity_list = default@prompt`, so Ansible asks for the Vault password.
+If you use a Vault password file instead, either:
+* set `ANSIBLE_VAULT_PASSWORD_FILE`, or
+* replace `vault_identity_list` in `ansible.cfg` with your preferred Vault identity configuration.

@@ -1,0 +1,62 @@
+listen_addr: "{{ loglugger_server_listen_addr }}"
+writer_backend: "ydb"
+position_table: "{{ loglugger_server_position_table }}"
+field_mapping_file: "{{ loglugger_server_field_mapping_file }}"
+max_compressed_body_bytes: {{ loglugger_server_max_compressed_body_bytes }}
+max_decompressed_body_bytes: {{ loglugger_server_max_decompressed_body_bytes }}
+convert_time_to_local_tz: {{ 'true' if (loglugger_server_convert_time_to_local_tz | bool) else 'false' }}
+{% if loglugger_server_message_regex | length > 0 %}
+message_regex: {{ loglugger_server_message_regex | to_json }}
+{% endif %}
+{% if loglugger_server_systemd_unit_regex | length > 0 %}
+systemd_unit_regex: {{ loglugger_server_systemd_unit_regex | to_json }}
+{% endif %}
+{% if loglugger_server_message_regex_no_match | length > 0 %}
+message_regex_no_match: "{{ loglugger_server_message_regex_no_match }}"
+{% endif %}
+
+tls_ca_file: "{{ loglugger_certs_dir }}/ca.crt"
+tls_cert_file: "{{ loglugger_certs_dir }}/server.crt"
+tls_key_file: "{{ loglugger_certs_dir }}/server.key"
+
+ydb_endpoint: "{{ loglugger_server_ydb_endpoint }}"
+ydb_database: "{{ loglugger_server_ydb_database }}"
+ydb_table: "{{ loglugger_server_ydb_table }}"
+ydb_auth_mode: "{{ loglugger_server_ydb_auth_mode }}"
+{% if loglugger_server_ydb_auth_login | length > 0 %}
+ydb_auth_login: "{{ loglugger_server_ydb_auth_login }}"
+{% endif %}
+{% if loglugger_server_ydb_auth_password | length > 0 %}
+ydb_auth_password: "{{ loglugger_server_ydb_auth_password }}"
+{% endif %}
+{% if loglugger_server_ydb_auth_sa_key_file | length > 0 %}
+ydb_auth_sa_key_file: "{{ loglugger_server_ydb_auth_sa_key_file }}"
+{% endif %}
+{% if loglugger_server_ydb_auth_metadata_url | length > 0 %}
+ydb_auth_metadata_url: "{{ loglugger_server_ydb_auth_metadata_url }}"
+{% endif %}
+{% if loglugger_server_ydb_ca_path | length > 0 %}
+ydb_ca_path: "{{ loglugger_server_ydb_ca_path }}"
+{% endif %}
+
+{% if loglugger_server_tls_client_subject_cn | length > 0 %}
+tls_client_subject_cn:
+{% for value in loglugger_server_tls_client_subject_cn %}
+  - "{{ value }}"
+{% endfor %}
+{% endif %}
+{% if loglugger_server_tls_client_subject_o | length > 0 %}
+tls_client_subject_o:
+{% for value in loglugger_server_tls_client_subject_o %}
+  - "{{ value }}"
+{% endfor %}
+{% endif %}
+{% if loglugger_server_tls_client_subject_ou | length > 0 %}
+tls_client_subject_ou:
+{% for value in loglugger_server_tls_client_subject_ou %}
+  - "{{ value }}"
+{% endfor %}
+{% endif %}
+{% if loglugger_server_extra_config | length > 0 %}
+{{ loglugger_server_extra_config | to_nice_yaml(indent=2) }}
+{% endif %}

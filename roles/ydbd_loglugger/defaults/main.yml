@@ -1,0 +1,84 @@
+# Source directory with loglugger binaries on the Ansible control host.
+loglugger_local_bin_dir: ./loglugger/bin
+
+# Loglugger installation directories on target hosts.
+loglugger_home: "{{ ydb_dir }}/loglugger"
+loglugger_bin_dir: "{{ loglugger_home }}/bin"
+loglugger_config_dir: "{{ loglugger_home }}/config"
+loglugger_certs_dir: "{{ loglugger_home }}/certs"
+
+# Client installation settings.
+loglugger_client_enabled: true
+loglugger_client_service_name: ydb-loglugger-client
+loglugger_client_service_mask: ""
+
+# Client certificate/key are selected by logical name under tls/CA/clients/<logical_name>.
+loglugger_client_certs_dir: ./tls/CA/clients
+loglugger_client_cert_logical_name: "{{ inventory_hostname }}"
+
+# Server subset can be selected either by host variable loglugger_server_enabled=true
+# or by inventory group membership in loglugger_server_group.
+loglugger_server_group: loglugger_server
+loglugger_server_enabled: false
+loglugger_server_service_name: ydb-loglugger-server
+loglugger_server_port: 27312
+loglugger_server_listen_addr: ":{{ loglugger_server_port }}"
+
+# If not explicitly provided, client server URLs are derived from loglugger_server_group.
+# Expected format: ["https://host1:27312", "https://host2:27312"].
+loglugger_client_servers: []
+
+# Server configuration defaults.
+loglugger_server_config_path: "{{ loglugger_config_dir }}/server.yaml"
+loglugger_server_position_table: loglugger_positions
+loglugger_server_field_mapping_file: "{{ loglugger_config_dir }}/field_mapping.yaml"
+loglugger_server_field_mapping:
+  - source: client_id
+    destination: hostname
+  - source: systemd_unit
+    destination: unit
+  - source: log_timestamp_us
+    destination: ts_log
+    transform: timestamp64_us
+  - source: message_cityhash64
+    destination: message_hash
+    transform: uint64
+  - source: parsed.P_DTTM
+    destination: ts_orig
+    transform: timestamp64
+  - source: parsed.P_SERVICE
+    destination: service
+    default: unknown
+  - source: parsed.P_LEVEL
+    destination: level
+    default: unknown
+  - source: parsed.P_DBNAME
+    destination: dbname
+    default: "-"
+  - source: message
+    destination: msg
+  - source: parsed.P_MESSAGE
+    destination: msg
+loglugger_server_max_compressed_body_bytes: 8388608
+loglugger_server_max_decompressed_body_bytes: 33554432
+loglugger_server_convert_time_to_local_tz: false
+loglugger_server_message_regex: ""
+loglugger_server_systemd_unit_regex: ""
+loglugger_server_message_regex_no_match: ""
+loglugger_server_extra_config: {}
+
+# YDB backend settings.
+loglugger_server_ydb_endpoint: ""
+loglugger_server_ydb_database: ""
+loglugger_server_ydb_table: ""
+loglugger_server_ydb_auth_mode: static
+loglugger_server_ydb_auth_login: ""
+loglugger_server_ydb_auth_password: ""
+loglugger_server_ydb_auth_sa_key_file: ""
+loglugger_server_ydb_auth_metadata_url: ""
+loglugger_server_ydb_ca_path: ""
+
+# Optional strict TLS client subject checks.
+loglugger_server_tls_client_subject_cn: []
+loglugger_server_tls_client_subject_o: []
+loglugger_server_tls_client_subject_ou: []

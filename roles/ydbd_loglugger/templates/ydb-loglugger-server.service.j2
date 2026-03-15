@@ -1,0 +1,15 @@
+[Unit]
+Description=YDB Loglugger Server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+ExecStart={{ loglugger_bin_dir }}/loglugger-server -config {{ loglugger_server_config_path }}
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

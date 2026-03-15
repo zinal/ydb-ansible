@@ -1,0 +1,16 @@
+---
+- name: Reload systemd
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: Restart loglugger client
+  ansible.builtin.systemd:
+    name: "{{ loglugger_client_service_name }}"
+    state: restarted
+  when: loglugger_client_enabled | bool
+
+- name: Restart loglugger server
+  ansible.builtin.systemd:
+    name: "{{ loglugger_server_service_name }}"
+    state: restarted
+  when: loglugger_server_enabled_effective | bool

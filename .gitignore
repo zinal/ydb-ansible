@@ -4,6 +4,7 @@ group_vars/all
 group_vars/ydbd_static
 group_vars/ydbd_dynamic
 files/secret
+files/secret-credentials.yml
 *.bak
 *.tmp
 *.tar.gz

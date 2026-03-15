@@ -1,0 +1,40 @@
+H=ydb-adm-1.front.private
+
+scp bin/* $H:.
+ssh $H sudo mkdir -pv /opt/ydb/loglugger
+ssh $H sudo mkdir -pv /opt/ydb/loglugger/bin
+ssh $H sudo mv -v loglugger-\* /opt/ydb/loglugger/bin/
+ssh $H sudo chown -v root:bin /opt/ydb/loglugger/bin/\*
+
+scp ../loglugger-setup/* $H:.
+ssh $H sudo mkdir -pv /opt/ydb/loglugger/config
+ssh $H sudo mv -v \*.yaml /opt/ydb/loglugger/config/
+ssh $H sudo chown -v root:bin /opt/ydb/loglugger/config/\*
+ssh $H sudo mv -v \*.service /etc/systemd/system/
+ssh $H sudo mv -v ydb-loglugger-client.env /etc/default/ydb-loglugger-client
+ssh $H sudo chown -v root:root /etc/systemd/system/ydb-loglugger-\* /etc/default/ydb-loglugger-client
+
+ssh $H sudo mkdir -pv /opt/ydb/loglugger/certs
+ssh $H sudo chown -v root:root /opt/ydb/loglugger/certs
+ssh $H sudo chmod -v 0700 /opt/ydb/loglugger/certs
+ssh $H sudo cp -v /opt/ydb/certs/ca.crt /opt/ydb/loglugger/certs/ca.crt
+ssh $H sudo cp -v /opt/ydb/certs/node.crt /opt/ydb/loglugger/certs/server.crt
+ssh $H sudo cp -v /opt/ydb/certs/node.key /opt/ydb/loglugger/certs/server.key
+
+ssh $H sudo systemctl daemon-reload
+ssh $H sudo systemctl start ydb-loglugger-server
+
+mkdir -pv certs
+openssl ecparam -name prime256v1 -genkey -noout -out certs/client.key
+openssl req -new -key certs/client.key \
+  -subj "/CN=loglugger-client/O=dev/OU=ydb" \
+  -out certs/client.csr
+
+openssl x509 -req -in certs/client.csr -out certs/client.crt \
+  -CA ../cluster1/playbooks/tls/CA/certs/ca.crt -CAkey ../cluster1/playbooks/tls/CA/secure/ca.key \
+  -days 1825 -sha256
+
+scp certs/client.crt $H:.
+scp certs/client.key $H:.
+ssh $H sudo mv -v client.\* /opt/ydb/loglugger/certs/
+ssh $H sudo chown -v -R root:root /opt/ydb/loglugger/certs/

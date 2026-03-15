@@ -1,0 +1,4 @@
+- hosts: ydbd_static:ydbd_dynamic
+  any_errors_fatal: true
+  roles:
+  - role: ydbd_loglugger

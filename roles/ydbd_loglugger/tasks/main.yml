@@ -1,0 +1,235 @@
+---
+- name: Detect if server component is enabled on this host
+  ansible.builtin.set_fact:
+    loglugger_server_enabled_effective: >-
+      {{
+        (loglugger_server_enabled | bool)
+        or
+        (inventory_hostname in (groups[loglugger_server_group] | default([])))
+      }}
+
+- name: Build default client server URL list from server group
+  ansible.builtin.set_fact:
+    loglugger_client_servers_effective: >-
+      {{
+        (groups[loglugger_server_group] | default([]))
+        | map('regex_replace', '^(.*)$', 'https://\\1:' ~ (loglugger_server_port | string))
+        | list
+      }}
+  when: (loglugger_client_servers | length) == 0
+
+- name: Use explicitly configured client server URL list
+  ansible.builtin.set_fact:
+    loglugger_client_servers_effective: "{{ loglugger_client_servers }}"
+  when: (loglugger_client_servers | length) > 0
+
+- name: Validate client certificates and server URLs
+  ansible.builtin.assert:
+    that:
+      - loglugger_client_cert_logical_name | length > 0
+      - loglugger_client_servers_effective | length > 0
+    fail_msg: >-
+      loglugger_client_cert_logical_name must be set and at least one server URL
+      must be configured (loglugger_client_servers or hosts in group
+      {{ loglugger_server_group }}).
+  when: loglugger_client_enabled | bool
+
+- name: Validate YDB settings for server backend
+  ansible.builtin.assert:
+    that:
+      - loglugger_server_ydb_endpoint | length > 0
+      - loglugger_server_ydb_database | length > 0
+      - loglugger_server_ydb_table | length > 0
+    fail_msg: >-
+      writer_backend=ydb requires non-empty values:
+      loglugger_server_ydb_endpoint, loglugger_server_ydb_database,
+      loglugger_server_ydb_table.
+  when:
+    - loglugger_server_enabled_effective | bool
+
+- name: Create loglugger home directory
+  ansible.builtin.file:
+    state: directory
+    path: "{{ loglugger_home }}"
+    owner: root
+    group: bin
+    mode: "0755"
+
+- name: Create loglugger binaries directory
+  ansible.builtin.file:
+    state: directory
+    path: "{{ loglugger_bin_dir }}"
+    owner: root
+    group: bin
+    mode: "0755"
+
+- name: Create loglugger configuration directory
+  ansible.builtin.file:
+    state: directory
+    path: "{{ loglugger_config_dir }}"
+    owner: root
+    group: bin
+    mode: "0755"
+
+- name: Create loglugger certificates directory
+  ansible.builtin.file:
+    state: directory
+    path: "{{ loglugger_certs_dir }}"
+    owner: root
+    group: root
+    mode: "0700"
+
+- name: Install loglugger client binary
+  ansible.builtin.copy:
+    src: "{{ loglugger_local_bin_dir }}/loglugger-client"
+    dest: "{{ loglugger_bin_dir }}/loglugger-client"
+    owner: root
+    group: bin
+    mode: "0555"
+  when: loglugger_client_enabled | bool
+  notify: Restart loglugger client
+
+- name: Install loglugger server binary
+  ansible.builtin.copy:
+    src: "{{ loglugger_local_bin_dir }}/loglugger-server"
+    dest: "{{ loglugger_bin_dir }}/loglugger-server"
+    owner: root
+    group: bin
+    mode: "0555"
+  when: loglugger_server_enabled_effective | bool
+  notify: Restart loglugger server
+
+- name: Install CA certificate for loglugger
+  ansible.builtin.copy:
+    src: "{{ ydb_dir }}/certs/ca.crt"
+    dest: "{{ loglugger_certs_dir }}/ca.crt"
+    remote_src: true
+    owner: root
+    group: root
+    mode: "0400"
+  notify:
+    - Restart loglugger client
+    - Restart loglugger server
+
+- name: Install server certificate for loglugger
+  ansible.builtin.copy:
+    src: "{{ ydb_dir }}/certs/node.crt"
+    dest: "{{ loglugger_certs_dir }}/server.crt"
+    remote_src: true
+    owner: root
+    group: root
+    mode: "0400"
+  when: loglugger_server_enabled_effective | bool
+  notify: Restart loglugger server
+
+- name: Install server key for loglugger
+  ansible.builtin.copy:
+    src: "{{ ydb_dir }}/certs/node.key"
+    dest: "{{ loglugger_certs_dir }}/server.key"
+    remote_src: true
+    owner: root
+    group: root
+    mode: "0400"
+  when: loglugger_server_enabled_effective | bool
+  notify: Restart loglugger server
+
+- name: Install client certificate for loglugger
+  ansible.builtin.copy:
+    src: "{{ loglugger_client_certs_dir }}/{{ loglugger_client_cert_logical_name }}/client.crt"
+    dest: "{{ loglugger_certs_dir }}/client.crt"
+    owner: root
+    group: root
+    mode: "0400"
+  when: loglugger_client_enabled | bool
+  notify: Restart loglugger client
+
+- name: Install client key for loglugger
+  ansible.builtin.copy:
+    src: "{{ loglugger_client_certs_dir }}/{{ loglugger_client_cert_logical_name }}/client.key"
+    dest: "{{ loglugger_certs_dir }}/client.key"
+    owner: root
+    group: root
+    mode: "0400"
+  when: loglugger_client_enabled | bool
+  notify: Restart loglugger client
+
+- name: Deploy loglugger server configuration
+  ansible.builtin.template:
+    src: server.yaml.j2
+    dest: "{{ loglugger_server_config_path }}"
+    owner: root
+    group: root
+    mode: "0600"
+  when: loglugger_server_enabled_effective | bool
+  notify: Restart loglugger server
+
+- name: Deploy loglugger field mapping configuration
+  ansible.builtin.template:
+    src: field_mapping.yaml.j2
+    dest: "{{ loglugger_server_field_mapping_file }}"
+    owner: root
+    group: bin
+    mode: "0644"
+  when:
+    - loglugger_server_enabled_effective | bool
+    - loglugger_server_field_mapping | length > 0
+  notify: Restart loglugger server
+
+- name: Deploy loglugger client environment file
+  ansible.builtin.template:
+    src: ydb-loglugger-client.env.j2
+    dest: "/etc/default/{{ loglugger_client_service_name }}"
+    owner: root
+    group: root
+    mode: "0644"
+  when: loglugger_client_enabled | bool
+  notify: Restart loglugger client
+
+- name: Deploy loglugger client systemd service
+  ansible.builtin.template:
+    src: ydb-loglugger-client.service.j2
+    dest: "/etc/systemd/system/{{ loglugger_client_service_name }}.service"
+    owner: root
+    group: root
+    mode: "0644"
+  when: loglugger_client_enabled | bool
+  notify:
+    - Reload systemd
+    - Restart loglugger client
+
+- name: Deploy loglugger server systemd service
+  ansible.builtin.template:
+    src: ydb-loglugger-server.service.j2
+    dest: "/etc/systemd/system/{{ loglugger_server_service_name }}.service"
+    owner: root
+    group: root
+    mode: "0644"
+  when: loglugger_server_enabled_effective | bool
+  notify:
+    - Reload systemd
+    - Restart loglugger server
+
+- name: Ensure loglugger client service is enabled and running
+  ansible.builtin.systemd:
+    name: "{{ loglugger_client_service_name }}"
+    state: started
+    enabled: true
+    daemon_reload: true
+  when: loglugger_client_enabled | bool
+
+- name: Ensure loglugger server service is enabled and running
+  ansible.builtin.systemd:
+    name: "{{ loglugger_server_service_name }}"
+    state: started
+    enabled: true
+    daemon_reload: true
+  when: loglugger_server_enabled_effective | bool
+
+- name: Ensure loglugger server service is disabled where not selected
+  ansible.builtin.systemd:
+    name: "{{ loglugger_server_service_name }}"
+    state: stopped
+    enabled: false
+    daemon_reload: true
+  failed_when: false
+  when: not (loglugger_server_enabled_effective | bool)
