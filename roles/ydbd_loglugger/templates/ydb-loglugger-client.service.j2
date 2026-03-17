@@ -7,13 +7,7 @@ Wants=network-online.target
 Type=simple
 User=root
 Group=root
-EnvironmentFile=/etc/default/{{ loglugger_client_service_name }}
-ExecStart={{ loglugger_bin_dir }}/loglugger-client \
-  -server ${LOGLUGGER_SERVER} \
-  -service-mask ${LOGLUGGER_SERVICE_MASK} \
-  -tls-ca-file ${LOGLUGGER_TLS_CA_FILE} \
-  -tls-cert-file ${LOGLUGGER_TLS_CERT_FILE} \
-  -tls-key-file ${LOGLUGGER_TLS_KEY_FILE}
+ExecStart={{ loglugger_bin_dir }}/loglugger-client -config {{ loglugger_client_config_path }}
 Restart=always
 RestartSec=3
 

@@ -11,8 +11,7 @@ ssh $H sudo mkdir -pv /opt/ydb/loglugger/config
 ssh $H sudo mv -v \*.yaml /opt/ydb/loglugger/config/
 ssh $H sudo chown -v root:bin /opt/ydb/loglugger/config/\*
 ssh $H sudo mv -v \*.service /etc/systemd/system/
-ssh $H sudo mv -v ydb-loglugger-client.env /etc/default/ydb-loglugger-client
-ssh $H sudo chown -v root:root /etc/systemd/system/ydb-loglugger-\* /etc/default/ydb-loglugger-client
+ssh $H sudo chown -v root:root /etc/systemd/system/ydb-loglugger-\*
 
 ssh $H sudo mkdir -pv /opt/ydb/loglugger/certs
 ssh $H sudo chown -v root:root /opt/ydb/loglugger/certs

@@ -175,13 +175,13 @@
     - loglugger_server_field_mapping | length > 0
   notify: Restart loglugger server
 
-- name: Deploy loglugger client environment file
+- name: Deploy loglugger client configuration
   ansible.builtin.template:
-    src: ydb-loglugger-client.env.j2
-    dest: "/etc/default/{{ loglugger_client_service_name }}"
+    src: client.yaml.j2
+    dest: "{{ loglugger_client_config_path }}"
     owner: root
     group: root
-    mode: "0644"
+    mode: "0600"
   when: loglugger_client_enabled | bool
   notify: Restart loglugger client
 

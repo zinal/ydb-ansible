@@ -10,7 +10,13 @@ loglugger_certs_dir: "{{ loglugger_home }}/certs"
 # Client installation settings.
 loglugger_client_enabled: true
 loglugger_client_service_name: ydb-loglugger-client
+loglugger_client_config_path: "{{ loglugger_config_dir }}/client.yaml"
 loglugger_client_service_mask: ""
+loglugger_client_message_regex: ""
+loglugger_client_systemd_unit_regex: ""
+loglugger_client_message_regex_no_match: ""
+loglugger_client_tls_use_system_pool: false
+loglugger_client_extra_config: {}
 
 # Client certificate/key are selected by logical name under tls/CA/clients/<logical_name>.
 loglugger_client_certs_dir: ./tls/CA/clients
@@ -62,9 +68,6 @@ loglugger_server_field_mapping:
 loglugger_server_max_compressed_body_bytes: 8388608
 loglugger_server_max_decompressed_body_bytes: 33554432
 loglugger_server_convert_time_to_local_tz: false
-loglugger_server_message_regex: ""
-loglugger_server_systemd_unit_regex: ""
-loglugger_server_message_regex_no_match: ""
 loglugger_server_extra_config: {}
 
 # YDB backend settings.

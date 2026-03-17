@@ -1,0 +1,25 @@
+server_urls:
+{% if (loglugger_client_servers_effective | length) == 1 %}
+  - "{{ loglugger_client_servers_effective[0] }}"
+{% else %}
+{% for server_url in loglugger_client_servers_effective %}
+  - "{{ server_url }}"
+{% endfor %}
+{% endif %}
+service_mask: "{{ loglugger_client_service_mask }}"
+tls_ca_file: "{{ loglugger_certs_dir }}/ca.crt"
+tls_cert_file: "{{ loglugger_certs_dir }}/client.crt"
+tls_key_file: "{{ loglugger_certs_dir }}/client.key"
+tls_use_system_pool: {{ 'true' if (loglugger_client_tls_use_system_pool | bool) else 'false' }}
+{% if loglugger_client_message_regex | length > 0 %}
+message_regex: {{ loglugger_client_message_regex | to_json }}
+{% endif %}
+{% if loglugger_client_systemd_unit_regex | length > 0 %}
+systemd_unit_regex: {{ loglugger_client_systemd_unit_regex | to_json }}
+{% endif %}
+{% if loglugger_client_message_regex_no_match | length > 0 %}
+message_regex_no_match: "{{ loglugger_client_message_regex_no_match }}"
+{% endif %}
+{% if loglugger_client_extra_config | length > 0 %}
+{{ loglugger_client_extra_config | to_nice_yaml(indent=2) }}
+{% endif %}

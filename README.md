@@ -164,7 +164,11 @@ Run:
 ```
 
 For configuration refresh (certificate rotation, server list updates, YDB backend changes), update variables and rerun the same playbook. The role is idempotent and restarts services only when relevant files or settings change.
-The role also renders `field_mapping.yaml` for the server (`field_mapping_file`) and supports parser settings such as `loglugger_server_message_regex`, `loglugger_server_systemd_unit_regex`, and `loglugger_server_message_regex_no_match`.
+The role renders both server and client config files:
+* `server.yaml` for `loglugger-server` (`-config <server.yaml>`);
+* `client.yaml` for `loglugger-client` (`-config <client.yaml>`).
+
+`loglugger-client` parser settings are configured on the client side via `loglugger_client_message_regex`, `loglugger_client_systemd_unit_regex`, and `loglugger_client_message_regex_no_match`.
 
 ## Protecting logging credentials with Vault
 
