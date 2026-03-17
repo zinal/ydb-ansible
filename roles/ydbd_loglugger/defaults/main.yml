@@ -39,7 +39,9 @@ loglugger_client_servers: []
 # Server configuration defaults.
 loglugger_server_config_path: "{{ loglugger_config_dir }}/server.yaml"
 loglugger_server_field_mapping_file: "{{ loglugger_config_dir }}/field_mapping.yaml"
+
 loglugger_server_field_mapping:
+  # Always present identity and uniqueness fields.
   - source: client_id
     destination: hostname
   - source: systemd_unit
@@ -50,9 +52,15 @@ loglugger_server_field_mapping:
   - source: message_cityhash64
     destination: message_hash
     transform: uint64
-  - source: parsed.P_DTTM
+  - source: seqno
+    destination: seqno
+    transform: int64
+
+  # ts_orig comes from client realtime clock (microseconds).
+  - source: realtime_ts
     destination: ts_orig
-    transform: timestamp64
+    transform: timestamp64_us
+  # Parsed fields from message regex groups.
   - source: parsed.P_SERVICE
     destination: service
     default: unknown
@@ -62,10 +70,13 @@ loglugger_server_field_mapping:
   - source: parsed.P_DBNAME
     destination: dbname
     default: "-"
+
+  # Keep raw `message`, overwrite with parsed value when present.
   - source: message
     destination: msg
   - source: parsed.P_MESSAGE
     destination: msg
+
 loglugger_server_max_compressed_body_bytes: 8388608
 loglugger_server_max_decompressed_body_bytes: 33554432
 loglugger_server_convert_time_to_local_tz: false
