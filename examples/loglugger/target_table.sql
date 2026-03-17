@@ -7,6 +7,7 @@ CREATE TABLE `ydblogs` (
   level Utf8,
   msg Utf8,
   unit Utf8,
+  seqno Int64,
   ts_log Timestamp64 NOT NULL,
   message_hash Uint64 NOT NULL,
   hostname Utf8 NOT NULL,
@@ -18,6 +19,9 @@ CREATE TABLE `ydblogs` (
 -- Table for position tracking.
 CREATE TABLE `loglugger_positions` (
   client_id Utf8 NOT NULL,
-  expected_position Utf8 NOT NULL,
+  exp_pos Utf8 NOT NULL,
+  ts_wall Timestamp64 NOT NULL,
+  seqno Int64,
+  ts_orig Timestamp64,
   PRIMARY KEY (client_id)
 );
