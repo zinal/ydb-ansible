@@ -1,8 +1,14 @@
-server_url: "https://loglugger-server.example:27312"
 service_mask: "regex:^ydbd-.*\\.service$"
+journal_recovery: true
+
+server_url: "https://loglugger-server.example:27312"
+
 message_regex: '^(?P<P_DTTM>[^ ]*) :(?P<P_SERVICE>[^ ]*) (?P<P_LEVEL>[^ ]*): (?P<P_MESSAGE>.*).*$'
 systemd_unit_regex: '^ydbd-(?P<P_DBNAME>[^-]+)-.*\.service$'
 message_regex_no_match: "send_raw"
+multiline_timeout: "1s"
+multiline_max_messages: 1000
+
 tls_ca_file: "/opt/ydb/loglugger/certs/ca.crt"
 tls_cert_file: "/opt/ydb/loglugger/certs/client.crt"
 tls_key_file: "/opt/ydb/loglugger/certs/client.key"
