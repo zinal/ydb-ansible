@@ -1,18 +1,21 @@
 listen_addr: "{{ loglugger_server_listen_addr }}"
-writer_backend: "ydb"
-position_table: "{{ loglugger_server_position_table }}"
-field_mapping_file: "{{ loglugger_server_field_mapping_file }}"
-max_compressed_body_bytes: {{ loglugger_server_max_compressed_body_bytes }}
-max_decompressed_body_bytes: {{ loglugger_server_max_decompressed_body_bytes }}
-convert_time_to_local_tz: {{ 'true' if (loglugger_server_convert_time_to_local_tz | bool) else 'false' }}
-
 tls_ca_file: "{{ loglugger_certs_dir }}/ca.crt"
 tls_cert_file: "{{ loglugger_certs_dir }}/server.crt"
 tls_key_file: "{{ loglugger_certs_dir }}/server.key"
 
+writer_backend: "ydb"
+
+ydb_table: "{{ loglugger_server_ydb_table }}"
+position_table: "{{ loglugger_server_position_table }}"
+field_mapping_file: "{{ loglugger_server_field_mapping_file }}"
+
+max_compressed_body_bytes: {{ loglugger_server_max_compressed_body_bytes }}
+max_decompressed_body_bytes: {{ loglugger_server_max_decompressed_body_bytes }}
+
+convert_time_to_local_tz: {{ 'true' if (loglugger_server_convert_time_to_local_tz | bool) else 'false' }}
+
 ydb_endpoint: "{{ loglugger_server_ydb_endpoint }}"
 ydb_database: "{{ loglugger_server_ydb_database }}"
-ydb_table: "{{ loglugger_server_ydb_table }}"
 ydb_auth_mode: "{{ loglugger_server_ydb_auth_mode }}"
 {% if loglugger_server_ydb_auth_login | length > 0 %}
 ydb_auth_login: "{{ loglugger_server_ydb_auth_login }}"
