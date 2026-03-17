@@ -213,6 +213,7 @@ The role renders both server and client config files:
 * `client.yaml` for `loglugger-client` (`-config <client.yaml>`).
 
 `loglugger-client` parser settings are configured on the client side via `loglugger_client_message_regex`, `loglugger_client_systemd_unit_regex`, and `loglugger_client_message_regex_no_match`.
+Client debug logging can be toggled with `loglugger_client_debug` (`true` or `false`).
 
 ## Protecting logging credentials with Vault
 

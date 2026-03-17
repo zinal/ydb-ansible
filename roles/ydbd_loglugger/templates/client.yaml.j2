@@ -1,3 +1,4 @@
+debug: {{ 'true' if (loglugger_client_debug | bool) else 'false' }}
 service_mask: "{{ loglugger_client_service_mask }}"
 journal_recovery: true
 {% if loglugger_client_journal_namespace | length > 0 %}

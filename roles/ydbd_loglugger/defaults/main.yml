@@ -12,6 +12,7 @@ loglugger_client_enabled: true
 loglugger_client_service_name: ydb-loglugger-client
 loglugger_client_config_path: "{{ loglugger_config_dir }}/client.yaml"
 loglugger_client_service_mask: "ydbd*.service"
+loglugger_client_debug: false
 loglugger_client_journal_namespace: "{{ ydb_log_namespace | default('') }}"
 loglugger_client_message_regex: ""
 loglugger_client_systemd_unit_regex: ""

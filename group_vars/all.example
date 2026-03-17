@@ -137,6 +137,8 @@ loglugger_client_cert_logical_name: "loglugger"
 #   nginx*.service
 #   regex:^nginx-(api|worker)\\.service$
 loglugger_client_service_mask: "ydbd*.service"
+# Enable extra debug logging in loglugger-client.
+loglugger_client_debug: false
 loglugger_client_message_regex: '^(?P<P_DTTM>[^ ]*) :(?P<P_SERVICE>[^ ]*) (?P<P_LEVEL>[^ ]*): (?P<P_MESSAGE>.*).*$'
 loglugger_client_systemd_unit_regex: '^ydbd-(?P<P_DBNAME>[^-]+)-.*[.]service$'
 loglugger_client_message_regex_no_match: "send_raw"
