@@ -1,5 +1,6 @@
 service_mask: "regex:^ydbd-.*\\.service$"
 journal_recovery: true
+# journal_namespace: "ydbd"
 
 server_url: "https://loglugger-server.example:27312"
 

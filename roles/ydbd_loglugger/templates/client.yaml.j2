@@ -1,5 +1,8 @@
 service_mask: "{{ loglugger_client_service_mask }}"
 journal_recovery: true
+{% if loglugger_client_journal_namespace | length > 0 %}
+journal_namespace: "{{ loglugger_client_journal_namespace }}"
+{% endif %}
 
 server_urls:
 {% if (loglugger_client_servers_effective | length) == 1 %}
