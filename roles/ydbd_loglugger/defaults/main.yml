@@ -79,7 +79,6 @@ loglugger_server_field_mapping:
 
 loglugger_server_max_compressed_body_bytes: 8388608
 loglugger_server_max_decompressed_body_bytes: 33554432
-loglugger_server_convert_time_to_local_tz: false
 loglugger_server_extra_config: {}
 
 # YDB backend settings.

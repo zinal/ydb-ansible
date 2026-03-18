@@ -12,8 +12,6 @@ field_mapping_file: "{{ loglugger_server_field_mapping_file }}"
 max_compressed_body_bytes: {{ loglugger_server_max_compressed_body_bytes }}
 max_decompressed_body_bytes: {{ loglugger_server_max_decompressed_body_bytes }}
 
-convert_time_to_local_tz: {{ 'true' if (loglugger_server_convert_time_to_local_tz | bool) else 'false' }}
-
 ydb_endpoint: "{{ loglugger_server_ydb_endpoint }}"
 ydb_database: "{{ loglugger_server_ydb_database }}"
 ydb_auth_mode: "{{ loglugger_server_ydb_auth_mode }}"
